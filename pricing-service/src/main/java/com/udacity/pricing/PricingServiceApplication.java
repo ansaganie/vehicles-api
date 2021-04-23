@@ -41,7 +41,7 @@ public class PricingServiceApplication {
         return args -> {
             for (var pair: PRICES.entrySet()) {
                 repository.save(pair.getValue());
-            };
+            }
         };
     }
 

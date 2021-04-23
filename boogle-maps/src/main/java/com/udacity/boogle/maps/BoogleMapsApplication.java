@@ -9,5 +9,4 @@ public class BoogleMapsApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(BoogleMapsApplication.class, args);
 	}
-
 }
