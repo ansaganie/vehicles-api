@@ -1,12 +1,16 @@
 package com.udacity.vehicles.client.prices;
 
-import com.netflix.discovery.EurekaClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Implements a class to interface with the Pricing Client for price data.
@@ -49,5 +53,45 @@ public class PriceClient {
             log.error("Unexpected error retrieving price for vehicle {}", vehicleId, e);
         }
         return "(consult price)";
+    }
+
+    public Price postPrice(Long vehicleId) {
+        Price price = new Price();
+        price.setCurrency("USD");
+        price.setVehicleId(vehicleId);
+        price.setPrice(randomPrice());
+
+
+        try {
+            return client.method(HttpMethod.POST)
+                    .uri("/prices")
+                    .body(Mono.just(price), Price.class)
+                    .retrieve()
+                    .bodyToMono(Price.class).block();
+        } catch (Exception e) {
+            log.error("Unexpected error creating price for vehicle {}", vehicleId, e);
+        }
+        return  null;
+    }
+
+    public void deletePrice(Long vehicleId) {
+        try {
+            client.method(HttpMethod.DELETE)
+                    .uri("/prices/" + vehicleId)
+                    .retrieve()
+                    .bodyToMono(Price.class).block();
+
+        } catch (Exception e) {
+            log.error("Unexpected error creating price for vehicle {}", vehicleId, e);
+        }
+    }
+
+    /**
+     * Gets a random price to fill in for a given vehicle ID.
+     * @return random price for a vehicle
+     */
+    private static BigDecimal randomPrice() {
+        return BigDecimal.valueOf(ThreadLocalRandom.current().nextDouble(1, 5))
+                .multiply(new BigDecimal("5000")).setScale(2, RoundingMode.HALF_UP);
     }
 }
