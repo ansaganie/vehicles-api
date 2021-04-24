@@ -1,5 +1,6 @@
 package com.udacity.vehicles.client.prices;
 
+import com.netflix.discovery.EurekaClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -37,8 +38,7 @@ public class PriceClient {
             Price price = client
                     .get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/prices")
-                            .queryParam("vehicleId", vehicleId)
+                            .path("/prices/" + vehicleId)
                             .build()
                     )
                     .retrieve().bodyToMono(Price.class).block();

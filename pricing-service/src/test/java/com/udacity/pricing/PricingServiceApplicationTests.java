@@ -34,8 +34,8 @@ public class PricingServiceApplicationTests {
 
 	@Test
 	public void getAllPrices() {
-		ResponseEntity<List> response = this.restTemplate.getForEntity("http://localhost:" + port
-		+ "/prices", List.class);
+		ResponseEntity<PriceList> response = this.restTemplate.getForEntity("http://localhost:" + port
+		+ "/prices", PriceList.class);
 
 		assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
 	}

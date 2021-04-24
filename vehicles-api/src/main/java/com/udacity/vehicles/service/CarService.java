@@ -1,5 +1,7 @@
 package com.udacity.vehicles.service;
 
+import com.netflix.appinfo.InstanceInfo;
+import com.netflix.discovery.EurekaClient;
 import com.udacity.vehicles.client.maps.MapsClient;
 import com.udacity.vehicles.client.prices.PriceClient;
 import com.udacity.vehicles.domain.Location;
@@ -24,12 +26,13 @@ public class CarService {
 
     private final WebClient maps;
     private final WebClient.Builder pricingWebClient;
-    private final String PRICING_ENDPOINT;
+    private final String PRICING_ENDPOINT = "pricing-service";
+    private final EurekaClient eurekaClient;
 
     private final ModelMapper modelMapper;
 
     public CarService(CarRepository repository, WebClient maps, WebClient.Builder pricing,
-                      @Value("${pricing.endpoint}") String endpoint, ModelMapper modelMapper) {
+                      ModelMapper modelMapper, EurekaClient eurekaClient) {
         /**
          * TODO: Add the Maps and Pricing Web Clients you create
          *   in `VehiclesApiApplication` as arguments and set them here.
@@ -37,8 +40,8 @@ public class CarService {
         this.repository = repository;
         this.maps = maps;
         this.pricingWebClient = pricing;
-        this.PRICING_ENDPOINT = endpoint;
         this.modelMapper = modelMapper;
+        this.eurekaClient = eurekaClient;
     }
 
     /**
@@ -69,7 +72,13 @@ public class CarService {
          * Note: The car class file uses @transient, meaning you will need to call
          *   the pricing service each time to get the price.
          */
-        PriceClient priceClient = new PriceClient(pricingWebClient.baseUrl(PRICING_ENDPOINT).build());
+        InstanceInfo instanceInfo = eurekaClient.getNextServerFromEureka(PRICING_ENDPOINT, false);
+
+
+        System.out.println("Home page URL for PRICING SERVICE: " + instanceInfo.getHomePageUrl());
+
+
+        PriceClient priceClient = new PriceClient(pricingWebClient.baseUrl(instanceInfo.getHomePageUrl()).build());
         String price = priceClient.getPrice(id);
         car.setPrice(price);
 

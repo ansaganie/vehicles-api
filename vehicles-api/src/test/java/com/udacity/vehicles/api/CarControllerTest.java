@@ -1,14 +1,11 @@
 package com.udacity.vehicles.api;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.udacity.vehicles.client.maps.MapsClient;
@@ -33,6 +30,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 /**
  * Implements testing of the CarController class.
@@ -96,7 +94,13 @@ public class CarControllerTest {
          *   the whole list of vehicles. This should utilize the car from `getCar()`
          *   below (the vehicle will be the first in the list).
          */
-
+        mvc.perform(get(new URI("/cars")).accept(MediaType.APPLICATION_JSON_UTF8)
+        ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$._embedded").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$._embedded.carList").isNotEmpty())
+                .andExpect(MockMvcResultMatchers.jsonPath("$._embedded.carList[0].id").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$._embedded.carList[0].condition").value("USED"));
     }
 
     /**
@@ -109,6 +113,13 @@ public class CarControllerTest {
          * TODO: Add a test to check that the `get` method works by calling
          *   a vehicle by ID. This should utilize the car from `getCar()` below.
          */
+        mvc.perform(get(new URI("/cars/1")).accept(MediaType.APPLICATION_JSON_UTF8)
+        ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.condition").value("USED"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.location").hasJsonPath())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.details.manufacturer").hasJsonPath());
     }
 
     /**
@@ -122,6 +133,7 @@ public class CarControllerTest {
          *   when the `delete` method is called from the Car Controller. This
          *   should utilize the car from `getCar()` below.
          */
+        mvc.perform(delete(new URI("/cars/1"))).andExpect(status().is2xxSuccessful());
     }
 
     /**

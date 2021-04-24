@@ -57,12 +57,11 @@ public class VehiclesApiApplication {
 
     /**
      * Web Client for the pricing API
-     * @param endpoint where to communicate for the pricing API
      * @return created pricing endpoint
      */
 
     @Bean(name="pricing")
-    public WebClient.Builder webClientPricing(@Value("${pricing.endpoint}") String endpoint) {
+    public WebClient.Builder webClientPricing() {
         return WebClient.builder();
     }
 
